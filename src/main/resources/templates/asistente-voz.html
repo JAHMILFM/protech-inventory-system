@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Tech | Analista de Inventario por Voz</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0D1B2A;
+            color: #E0E1DD;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1a1f2e;
+            padding: 30px;
+            border-radius: 14px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mic-btn {
+            background: #CCFF00;
+            color: #0D1B2A;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(204,255,0,0.3);
+        }
+        .mic-btn.escuchando {
+            background: #E63946;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230,57,70, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(230,57,70, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230,57,70, 0); }
+        }
+        .transcript {
+            margin-top: 20px;
+            font-style: italic;
+            color: #778DA9;
+            min-height: 24px;
+        }
+        .response-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.5;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎙️ Analista Pro-Tech</h2>
+    <p>Hazme una pregunta sobre tu inventario</p>
+    
+    <button id="btnMic" class="mic-btn">🎤</button>
+    
+    <div id="statusText" class="transcript">Presiona el micrófono para hablar...</div>
+    <div id="responseBox" class="response-box"></div>
+</div>
+
+<script>
+    const btnMic = document.getElementById('btnMic');
+    const statusText = document.getElementById('statusText');
+    const responseBox = document.getElementById('responseBox');
+
+    // Comprobar soporte de la Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-PE'; // Español de Perú
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    let isRecording = false;
+
+    btnMic.addEventListener('click', () => {
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            recognition.start();
+        }
+    });
+
+    recognition.onstart = function() {
+        isRecording = true;
+        btnMic.classList.add('escuchando');
+        statusText.textContent = "Escuchando...";
+        responseBox.style.display = 'none';
+        window.speechSynthesis.cancel(); // Detener si estaba hablando
+    };
+
+    recognition.onresult = function(event) {
+        const transcripcion = event.results[0][0].transcript;
+        statusText.textContent = `Tú: "${transcripcion}"`;
+        enviarConsultaAlServidor(transcripcion);
+    };
+
+    recognition.onspeechend = function() {
+        recognition.stop();
+    };
+
+    recognition.onend = function() {
+        isRecording = false;
+        btnMic.classList.remove('escuchando');
+        if (statusText.textContent === "Escuchando...") {
+            statusText.textContent = "Presiona el micrófono para hablar...";
+        }
+    };
+
+    recognition.onerror = function(event) {
+        statusText.textContent = "Error en el micrófono: " + event.error;
+    };
+
+    // Función para enviar la petición al Backend Spring Boot
+    async function enviarConsultaAlServidor(mensaje) {
+        statusText.textContent += " (Analizando...)";
+        
+        try {
+            const response = await fetch('/api/analista/conversar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Si usas Spring Security (CSRF o Auth JWT), inclúyelos aquí.
+                },
+                body: JSON.stringify({ mensaje: mensaje })
+            });
+
+            const data = await response.json();
+            const respuestaBot = data.respuestaTexto;
+
+            // Mostrar texto en pantalla
+            responseBox.textContent = respuestaBot;
+            responseBox.style.display = 'block';
+            statusText.textContent = "Consulta completada.";
+
+            // Reproducir por voz (Text-to-Speech)
+            hablar(respuestaBot);
+
+        } catch (error) {
+            console.error('Error:', error);
+            statusText.textContent = "Hubo un error de conexión con el servidor.";
+        }
+    }
+
+    // Función de síntesis de voz
+    function hablar(texto) {
+        if (!window.speechSynthesis) return;
+
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-PE';
+        utterance.rate = 1.0;  // Velocidad normal
+        utterance.pitch = 1.0; // Tono normal
+
+        // Intentar usar una voz de Microsoft/Google más natural si está disponible
+        const voices = window.speechSynthesis.getVoices();
+        const voiceEs = voices.find(v => v.lang.includes('es-') && v.name.includes('Google')) 
+                     || voices.find(v => v.lang.includes('es-'));
+        if (voiceEs) utterance.voice = voiceEs;
+
+        window.speechSynthesis.speak(utterance);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Tech | Panel de Administración</title>
+    <meta name="description" content="Sistema de inventario industrial Ferretería Pro-Tech">
+    <link rel="stylesheet" th:href="@{/css/protech.css}">
+</head>
+<body>
+
+<!-- ══ TOAST CONTAINER ══ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">🔩</div>
+        <div class="sidebar-brand"><h2>Pro-<span>Tech</span></h2><p>Inventario Industrial</p></div>
+    </div>
+    <div id="sidebarToggle" class="sidebar-toggle">◀</div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            <a class="nav-item active" data-page="dashboard" href="#"><span class="icon">📊</span><span class="label">Dashboard</span></a>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-title">Catálogo</div>
+            <a class="nav-item" data-page="productos" href="#"><span class="icon">📦</span><span class="label">Productos</span></a>
+            <a class="nav-item" data-page="categorias" href="#"><span class="icon">📁</span><span class="label">Categorías</span></a>
+            <a class="nav-item" data-page="marcas" href="#"><span class="icon">🏷️</span><span class="label">Marcas</span></a>
+            <a class="nav-item" data-page="proveedores" href="#"><span class="icon">🚚</span><span class="label">Proveedores</span></a>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-title">Inventario</div>
+            <a class="nav-item" data-page="kardex" href="#"><span class="icon">📋</span><span class="label">Kardex</span></a>
+            <a class="nav-item" data-page="anaquel" href="#"><span class="icon">🗄️</span><span class="label">Vista Anaquel</span></a>
+            <a class="nav-item" data-page="stock-critico" href="#"><span class="icon">⚠️</span><span class="label">Stock Crítico</span> <span class="badge badge-danger sidebar-badge">!</span></a>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-title">Ventas</div>
+            <a class="nav-item" data-page="pedidos" href="#"><span class="icon">🛒</span><span class="label">Pedidos</span> <span class="badge badge-warning sidebar-badge">3</span></a>
+            <a class="nav-item" data-page="reportes" href="#"><span class="icon">📈</span><span class="label">Reportes</span></a>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-title">Sistema</div>
+            <a class="nav-item" data-page="usuarios" href="#"><span class="icon">👥</span><span class="label">Usuarios</span></a>
+            <a class="nav-item" data-page="configuracion" href="#"><span class="icon">⚙️</span><span class="label">Configuración</span></a>
+        </div>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar" sec:authentication="name">A</div>
+            <div class="user-info">
+                <div class="name" sec:authentication="name">Admin</div>
+                <div class="role">Administrador</div>
+            </div>
+        </div>
+        <a th:href="@{/logout}" class="nav-item" style="margin-top:8px;color:var(--danger)"><span class="icon">🚪</span><span class="label">Cerrar Sesión</span></a>
+    </div>
+</aside>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main class="main-content">
+    <header class="top-bar">
+        <div class="breadcrumbs">
+            <span class="icon">🏠</span> / <span id="current-breadcrumb">Dashboard</span>
+        </div>
+        <div class="top-actions">
+            <button class="btn-icon" title="Notificaciones">🔔</button>
+            <button class="btn-icon" title="Configuración">⚙️</button>
+        </div>
+    </header>
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <section id="page-dashboard" class="page-section active">
+        <div class="page-header">
+            <div><h1>Dashboard</h1><p>Resumen general del inventario</p></div>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card accent">
+                <div class="metric-header"><div class="metric-icon">📦</div></div>
+                <div class="metric-value" id="metric-total">—</div>
+                <div class="metric-label">Total Productos</div>
+            </div>
+            <div class="metric-card success">
+                <div class="metric-header"><div class="metric-icon">✅</div></div>
+                <div class="metric-value" id="metric-activos">—</div>
+                <div class="metric-label">Productos Activos</div>
+            </div>
+            <div class="metric-card danger">
+                <div class="metric-header"><div class="metric-icon">⚠️</div></div>
+                <div class="metric-value" id="metric-critico">—</div>
+                <div class="metric-label">Stock Crítico</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-header"><div class="metric-icon">📁</div></div>
+                <div class="metric-value" id="metric-categorias">—</div>
+                <div class="metric-label">Categorías</div>
+            </div>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card accent">
+                <div class="metric-header"><div class="metric-icon">👥</div></div>
+                <div class="metric-value" id="metric-usuarios">—</div>
+                <div class="metric-label">Usuarios</div>
+            </div>
+            <div class="metric-card success">
+                <div class="metric-header"><div class="metric-icon">🔄</div></div>
+                <div class="metric-value" id="metric-movimientos">—</div>
+                <div class="metric-label">Movimientos Hoy</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-header"><div class="metric-icon">💰</div></div>
+                <div class="metric-value" id="metric-valor-costo" style="font-size:22px">—</div>
+                <div class="metric-label">Valor Inventario (Costo)</div>
+            </div>
+            <div class="metric-card accent">
+                <div class="metric-header"><div class="metric-icon">💵</div></div>
+                <div class="metric-value" id="metric-valor-venta" style="font-size:22px">—</div>
+                <div class="metric-label">Valor Inventario (Venta)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PRODUCTOS PAGE ── -->
+    <section id="page-productos" class="page-section">
+        <div class="page-header">
+            <div><h1>Productos</h1><p>Gestión del catálogo de productos</p></div>
+            <button class="btn btn-primary" onclick="openProductModal()">➕ Nuevo Producto</button>
+        </div>
+        <div class="metrics-grid small-metrics" style="margin-bottom: 20px;">
+            <div class="metric-card">
+                <div class="metric-value" id="prod-total">0</div>
+                <div class="metric-label">Total Productos</div>
+            </div>
+            <div class="metric-card danger">
+                <div class="metric-value" id="prod-critico">0</div>
+                <div class="metric-label">Stock Crítico</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-value" id="prod-pedidos">3</div>
+                <div class="metric-label">Pedidos del Día</div>
+            </div>
+            <div class="metric-card accent">
+                <div class="metric-value" id="prod-valor">S/ 0.00</div>
+                <div class="metric-label">Valor Inventario</div>
+            </div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar">
+                <h3>📦 Inventario</h3>
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" id="searchProducts" placeholder="Buscar por nombre, SKU o marca..." oninput="filterProducts()">
+                </div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th><th>Categoría</th><th>Marca</th><th>P. Costo</th><th>P. Venta</th>
+                        <th>Stock</th><th>Mínimo</th><th>Ubicación</th><th>Estado</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="products-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── CATEGORÍAS PAGE ── -->
+    <section id="page-categorias" class="page-section">
+        <div class="page-header">
+            <div><h1>Categorías</h1><p>Estructura jerárquica del catálogo</p></div>
+            <button class="btn btn-primary" onclick="openCategoryModal()">➕ Nueva Categoría</button>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>📁 Categorías</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Nombre</th><th>Imagen</th><th>Nivel</th><th>Padre</th><th>Subcategorías</th><th>Productos</th><th>Activo</th><th>Acciones</th></tr></thead>
+                <tbody id="categories-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── KARDEX PAGE ── -->
+    <section id="page-kardex" class="page-section">
+        <div class="page-header">
+            <div><h1>Kardex</h1><p>Registro de movimientos de inventario</p></div>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-primary" onclick="openKardexModal('entrada')">📥 Entrada</button>
+                <button class="btn btn-danger" onclick="openKardexModal('salida')">📤 Salida</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>📋 Movimientos</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cant.</th><th>Stock</th><th>Motivo</th><th>Proveedor</th></tr></thead>
+                <tbody id="kardex-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── MARCAS PAGE ── -->
+    <section id="page-marcas" class="page-section">
+        <div class="page-header">
+            <div><h1>Marcas</h1><p>Catálogo de marcas de productos</p></div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>🏷️ Marcas registradas</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Marca</th><th>Nº Productos</th><th>Categorías</th><th>Estado</th></tr></thead>
+                <tbody id="marcas-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── PROVEEDORES PAGE ── -->
+    <section id="page-proveedores" class="page-section">
+        <div class="page-header">
+            <div><h1>Proveedores</h1><p>Proveedores activos de mercancía</p></div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>🚚 Proveedores registrados</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Proveedor</th><th>Productos Suministrados</th><th>Último Movimiento</th><th>Estado</th></tr></thead>
+                <tbody id="proveedores-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── ANAQUEL PAGE ── -->
+    <section id="page-anaquel" class="page-section">
+        <div class="page-header">
+            <div><h1>Vista Anaquel</h1><p>Mapa visual de ubicaciones en el almacén</p></div>
+        </div>
+        <div id="anaquel-grid" class="anaquel-grid"></div>
+    </section>
+
+    <!-- ── STOCK CRÍTICO PAGE ── -->
+    <section id="page-stock-critico" class="page-section">
+        <div class="page-header">
+            <div><h1>Stock Crítico</h1><p>Productos con inventario por debajo del mínimo</p></div>
+            <button class="btn btn-primary" onclick="openKardexModal('entrada')">📥 Reponer Stock</button>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>⚠️ Alertas de Stock</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Stock Actual</th><th>Mínimo</th><th>Déficit</th><th>Acción</th></tr></thead>
+                <tbody id="stock-critico-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── PEDIDOS PAGE ── -->
+    <section id="page-pedidos" class="page-section">
+        <div class="page-header">
+            <div><h1>Pedidos</h1><p>Gestión de pedidos de clientes</p></div>
+            <button class="btn btn-primary" onclick="showToast('Módulo de pedidos en desarrollo','info')">➕ Nuevo Pedido</button>
+        </div>
+        <div class="metrics-grid small-metrics" style="margin-bottom:20px;">
+            <div class="metric-card warning"><div class="metric-value" id="ped-pendientes">3</div><div class="metric-label">Pendientes</div></div>
+            <div class="metric-card success"><div class="metric-value" id="ped-completados">12</div><div class="metric-label">Completados Hoy</div></div>
+            <div class="metric-card accent"><div class="metric-value" id="ped-total-dia">15</div><div class="metric-label">Total del Día</div></div>
+            <div class="metric-card danger"><div class="metric-value" id="ped-cancelados">1</div><div class="metric-label">Cancelados</div></div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>🛒 Lista de Pedidos</h3></div>
+            <table class="data-table">
+                <thead><tr><th>#Pedido</th><th>Cliente</th><th>Fecha</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acción</th></tr></thead>
+                <tbody id="pedidos-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── REPORTES PAGE ── -->
+    <section id="page-reportes" class="page-section">
+        <div class="page-header">
+            <div><h1>Reportes</h1><p>Análisis y estadísticas del sistema</p></div>
+        </div>
+        <div class="metrics-grid" style="margin-bottom:24px;">
+            <div class="metric-card accent" style="cursor:pointer" onclick="exportarReporte('inventario')">
+                <div class="metric-header"><div class="metric-icon">📦</div></div>
+                <div class="metric-value" style="font-size:20px">Inventario</div>
+                <div class="metric-label">Exportar lista completa de productos</div>
+            </div>
+            <div class="metric-card success" style="cursor:pointer" onclick="exportarReporte('movimientos')">
+                <div class="metric-header"><div class="metric-icon">📋</div></div>
+                <div class="metric-value" style="font-size:20px">Movimientos</div>
+                <div class="metric-label">Exportar Kardex completo</div>
+            </div>
+            <div class="metric-card danger" style="cursor:pointer" onclick="exportarReporte('stock-critico')">
+                <div class="metric-header"><div class="metric-icon">⚠️</div></div>
+                <div class="metric-value" style="font-size:20px">Stock Crítico</div>
+                <div class="metric-label">Lista de productos a reponer</div>
+            </div>
+            <div class="metric-card warning" style="cursor:pointer" onclick="exportarReporte('valoracion')">
+                <div class="metric-header"><div class="metric-icon">💰</div></div>
+                <div class="metric-value" style="font-size:20px">Valoración</div>
+                <div class="metric-label">Valor económico del inventario</div>
+            </div>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>📈 Resumen de Categorías</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Categoría</th><th>Nivel</th><th>Productos</th><th>Stock Total</th><th>Valor Costo</th><th>Valor Venta</th></tr></thead>
+                <tbody id="reportes-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── USUARIOS PAGE ── -->
+    <section id="page-usuarios" class="page-section">
+        <div class="page-header">
+            <div><h1>Usuarios</h1><p>Gestión del personal del sistema</p></div>
+            <button class="btn btn-primary" onclick="showToast('Módulo de creación de usuarios en desarrollo','info')">➕ Nuevo Usuario</button>
+        </div>
+        <div class="table-container">
+            <div class="table-toolbar"><h3>👥 Usuarios del sistema</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Usuario</th><th>Nombre Completo</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead>
+                <tbody id="usuarios-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── CONFIGURACIÓN PAGE ── -->
+    <section id="page-configuracion" class="page-section">
+        <div class="page-header">
+            <div><h1>Configuración</h1><p>Parámetros del sistema Pro-Tech</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div class="table-container" style="padding:24px;">
+                <h3 style="margin-bottom:16px;font-size:16px;">🏪 Datos del Negocio</h3>
+                <div class="form-grid">
+                    <div class="form-group full"><label>Nombre de la Empresa</label><input value="Ferretería Pro-Tech" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>RUC</label><input value="20123456789" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>Dirección</label><input value="Av. Industrial 123, Lima" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>Teléfono</label><input value="(01) 555-0123" readonly style="background:#f8f9fa;"></div>
+                </div>
+            </div>
+            <div class="table-container" style="padding:24px;">
+                <h3 style="margin-bottom:16px;font-size:16px;">⚙️ Parámetros del Sistema</h3>
+                <div class="form-grid">
+                    <div class="form-group full"><label>Moneda</label><input value="Soles (S/)" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>IGV (%)</label><input value="18" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>Versión del Sistema</label><input value="Pro-Tech v1.0.0" readonly style="background:#f8f9fa;"></div>
+                    <div class="form-group full"><label>Base de Datos</label><input value="MySQL 8.0 — ferreteria_protech" readonly style="background:#f8f9fa;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ MODAL: PRODUCTO ══ -->
+<div id="productModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="productModalTitle">Nuevo Producto</h3>
+            <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="productForm" onsubmit="event.preventDefault();saveProduct()">
+                <div class="form-grid">
+                    <div class="form-group"><label>SKU *</label><input id="prodSku" required placeholder="FPT-001"></div>
+                    <div class="form-group"><label>EAN-13</label><input id="prodEan" maxlength="13" placeholder="7501234567890"></div>
+                    <div class="form-group full"><label>Nombre *</label><input id="prodNombre" required placeholder="Nombre del producto"></div>
+                    <div class="form-group full"><label>Descripción</label><textarea id="prodDescripcion" placeholder="Descripción opcional"></textarea></div>
+                    <div class="form-group"><label>Categoría</label><select id="prodCategoria"></select></div>
+                    <div class="form-group"><label>Marca</label><input id="prodMarca" placeholder="Stanley, Bosch..."></div>
+                    <div class="form-group"><label>Modelo</label><input id="prodModelo" placeholder="Modelo"></div>
+                    <div class="form-group"><label>Precio Costo *</label><input id="prodPrecioCosto" type="number" step="0.01" min="0.01" required></div>
+                    <div class="form-group"><label>Precio Venta *</label><input id="prodPrecioVenta" type="number" step="0.01" min="0.01" required></div>
+                    <div class="form-group"><label>Precio Oferta</label><input id="prodPrecioOferta" type="number" step="0.01" min="0"></div>
+                    <div class="form-group"><label>Stock Actual</label><input id="prodStockActual" type="number" min="0" value="0"></div>
+                    <div class="form-group"><label>Stock Mínimo</label><input id="prodStockMinimo" type="number" min="0" value="0"></div>
+                    <div class="form-group"><label>Pasillo</label><input id="prodPasillo" placeholder="1"></div>
+                    <div class="form-group"><label>Lado</label><input id="prodLado" placeholder="A"></div>
+                    <div class="form-group"><label>Nivel</label><input id="prodNivel" placeholder="3"></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveProduct()">💾 Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: CATEGORÍA ══ -->
+<div id="categoryModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="catModalTitle">Nueva Categoría</h3>
+            <button class="modal-close" onclick="closeModal('categoryModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="categoryForm" onsubmit="event.preventDefault();saveCategory()">
+                <div class="form-grid">
+                    <div class="form-group full"><label>Nombre *</label><input id="catNombre" required placeholder="Nombre de la categoría"></div>
+                    <div class="form-group full"><label>Descripción</label><textarea id="catDescripcion" placeholder="Descripción"></textarea></div>
+                    <div class="form-group full"><label>Categoría Padre</label><select id="catPadre"></select></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveCategory()">💾 Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: KARDEX ══ -->
+<div id="kardexModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="kardexModalTitle">Registrar Movimiento</h3>
+            <button class="modal-close" onclick="closeModal('kardexModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="kardexForm" onsubmit="event.preventDefault();saveKardex()">
+                <input type="hidden" id="kardexTipo" value="entrada">
+                <div class="form-grid">
+                    <div class="form-group full"><label>Producto *</label><select id="kardexProducto" required></select></div>
+                    <div class="form-group"><label>Cantidad *</label><input id="kardexCantidad" type="number" min="1" required></div>
+                    <div class="form-group" id="kardexPrecioGroup"><label>Precio Unitario</label><input id="kardexPrecio" type="number" step="0.01" min="0"></div>
+                    <div class="form-group" id="kardexProveedorGroup"><label>Proveedor</label><input id="kardexProveedor" placeholder="Proveedor"></div>
+                    <div class="form-group"><label>Documento Ref.</label><input id="kardexDocumento" placeholder="Factura, Guía..."></div>
+                    <div class="form-group full"><label>Motivo</label><textarea id="kardexMotivo" placeholder="Motivo del movimiento"></textarea></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('kardexModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveKardex()">💾 Registrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── FLOATING VOICE ASSISTANT ────────────────── -->
+<div class="voice-bot-container" id="voiceBotContainer">
+    <div class="voice-bot-window" id="voiceBotWindow">
+        <div class="voice-bot-header">
+            <h3>🤖 Analista IA</h3>
+            <button class="voice-bot-close" onclick="toggleVoiceBot()">×</button>
+        </div>
+        <div class="voice-bot-body" id="voiceBotBody">
+            <div class="bot-msg">¡Hola! Soy tu asistente de inventario. Presiona el micrófono y hazme una pregunta.</div>
+        </div>
+        <div class="voice-bot-footer">
+            <button class="mic-btn-small" id="btnMicGlobal" onclick="toggleMic()">🎤</button>
+            <div class="mic-status" id="micStatusText">Inactivo</div>
+        </div>
+    </div>
+    <button class="voice-bot-fab" onclick="toggleVoiceBot()">🤖</button>
+</div>
+
+<script th:src="@{/js/protech.js}"></script>
+<script th:src="@{/js/protech-extra.js}"></script>
+</body>
+</html>
