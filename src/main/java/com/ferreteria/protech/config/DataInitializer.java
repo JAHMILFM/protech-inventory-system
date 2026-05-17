@@ -23,6 +23,7 @@ public class DataInitializer {
                                CategoryRepository catRepo,
                                ProductRepository prodRepo,
                                PedidoRepository pedRepo,
+                               KardexRepository kardexRepo,
                                PasswordEncoder encoder) {
         return args -> {
             // ── Crear Roles si no existen ──────────────────
@@ -198,7 +199,23 @@ public class DataInitializer {
                 crearPedido(pedRepo, "PED-002", "Ferretería El Sol", 5, new BigDecimal("890.50"), "Pendiente");
                 crearPedido(pedRepo, "PED-003", "Taller Mecánico Norte", 2, new BigDecimal("445.00"), "Pendiente");
                 crearPedido(pedRepo, "PED-004", "Distribuciones García", 8, new BigDecimal("3200.00"), "Completado");
-                crearPedido(pedRepo, "PED-005", "Ing. Torres & Asoc.", 1, new BigDecimal("349.90"), "Cancelado");
+            }
+
+            // ── Crear Kardex (Movimientos) si no existen ─────────────
+            if (kardexRepo.count() == 0) {
+                User admin = userRepo.findByUsername("admin").orElse(null);
+                
+                prodRepo.findAll().forEach(p -> {
+                    // Simular entrada inicial
+                    crearMovimientoKardex(kardexRepo, p, Kardex.TipoMovimiento.ENTRADA, 
+                            p.getStockActual() + 10, 0, p.getStockActual() + 10, 
+                            p.getPrecioCosto(), "Inventario Inicial", "Proveedor S.A.", admin);
+                    
+                    // Simular una salida (venta)
+                    crearMovimientoKardex(kardexRepo, p, Kardex.TipoMovimiento.SALIDA, 
+                            10, p.getStockActual() + 10, p.getStockActual(), 
+                            p.getPrecioVenta(), "Venta Mostrador", null, admin);
+                });
             }
         };
     }
@@ -234,5 +251,22 @@ public class DataInitializer {
         p.setTotal(total);
         p.setEstado(estado);
         repo.save(p);
+    }
+
+    private void crearMovimientoKardex(KardexRepository kardexRepo, Product producto, Kardex.TipoMovimiento tipo, 
+            int cantidad, int stockAnterior, int stockNuevo, BigDecimal precioUnitario, 
+            String motivo, String proveedor, User usuario) {
+        Kardex k = new Kardex();
+        k.setProducto(producto);
+        k.setTipoMovimiento(tipo);
+        k.setCantidad(cantidad);
+        k.setStockAnterior(stockAnterior);
+        k.setStockNuevo(stockNuevo);
+        k.setPrecioUnitario(precioUnitario);
+        k.setCostoTotal(precioUnitario.multiply(new BigDecimal(cantidad)));
+        k.setMotivo(motivo);
+        k.setProveedor(proveedor);
+        k.setUsuario(usuario);
+        kardexRepo.save(k);
     }
 }
