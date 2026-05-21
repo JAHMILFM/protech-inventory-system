@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro-Tech | Portal de Proveedores</title>
+    <link rel="stylesheet" th:href="@{/css/proveedor.css}">
+</head>
+<body>
+    <div class="portal-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">📦</div>
+                Pro-Tech B2B
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+                <div class="nav-item" onclick="switchTab('ordenes')">📦 Mis Órdenes</div>
+                <div class="nav-item" onclick="switchTab('catalogo')">📋 Catálogo de Productos</div>
+                <div class="nav-item" onclick="switchTab('anaqueles')">🗄️ Mis Anaqueles</div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="welcome-msg">Hola, <span id="empresaName">...</span></div>
+                <div class="top-bar-right">
+                    <a th:href="@{/logout}" class="btn-logout">🚪 Salir</a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard -->
+                <div id="tab-dashboard">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-title">Órdenes Pendientes</span>
+                            <span class="metric-value" id="m-pendientes">0</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-title">En Tránsito</span>
+                            <span class="metric-value" id="m-transito" style="color:var(--info)">0</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-title">Total Facturado</span>
+                            <span class="metric-value" id="m-facturado" style="color:var(--success)">S/ 0.00</span>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                        <div>
+                            <div class="section-title">📦 Últimas Órdenes de Compra</div>
+                            <table class="ordenes-table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Orden</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-ordenes"></tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <div class="section-title">📈 Alertas de Stock Crítico</div>
+                            <div class="critico-list" id="critico-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Otras Tabs -->
+                <div id="tab-ordenes" style="display:none;">
+                    <div class="section-title">📦 Gestión de Órdenes de Compra</div>
+                    <table class="ordenes-table">
+                        <thead>
+                            <tr>
+                                <th>N° Orden</th>
+                                <th>Fecha</th>
+                                <th>Artículos</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todas-ordenes"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-catalogo" style="display:none;">
+                    <div class="section-title">📋 Mi Catálogo en Pro-Tech</div>
+                    <table class="ordenes-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Nombre del Producto</th>
+                                <th>Precio Costo (Acordado)</th>
+                                <th>Stock Actual</th>
+                                <th>Ubicación (Anaquel)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalogo-list"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-anaqueles" style="display:none;">
+                    <div class="section-title">🗄️ Mapa Visual de Anaqueles</div>
+                    <p style="color:var(--text-muted); font-size:14px; margin-bottom: 20px;">
+                        Esta vista simula cómo están distribuidos tus productos en los racks de la ferretería.
+                    </p>
+                    <div id="anaqueles-container" class="anaqueles-grid">
+                        <!-- El JS llenará esto agrupado por Pasillo -> Lado -> Nivel -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script th:src="@{/js/proveedor.js}"></script>
+</body>
+</html>

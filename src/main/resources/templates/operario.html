@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Tech | Punto de Venta</title>
+    <meta name="description" content="Panel de operario — Atención al cliente, ventas y recepción de mercancía">
+    <link rel="stylesheet" th:href="@{/css/operario.css}">
+</head>
+<body>
+
+<!-- ══ TOAST CONTAINER ══ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════
+     LAYOUT PRINCIPAL POS
+══════════════════════════════════════════════════ -->
+<div class="pos-wrapper">
+
+    <!-- ── TOP BAR ──────────────────────────────── -->
+    <header class="top-bar">
+        <div class="top-bar-brand">
+            <div class="logo-icon">🔩</div>
+            Pro-<span>Tech</span>
+            <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:4px;">Punto de Venta</span>
+        </div>
+
+        <div class="top-bar-metrics">
+            <div class="top-metric success">
+                <span>🛒</span>
+                <span>Ventas hoy: <strong id="m-ventas">—</strong></span>
+            </div>
+            <div class="top-metric accent">
+                <span>💰</span>
+                <span>Total: <strong id="m-total">—</strong></span>
+            </div>
+            <div class="top-metric danger" id="m-critico-wrap">
+                <span>⚠️</span>
+                <span>Stock crítico: <strong id="m-critico">—</strong></span>
+            </div>
+            <div class="top-metric info">
+                <span>📥</span>
+                <span>Entradas hoy: <strong id="m-entradas">—</strong></span>
+            </div>
+        </div>
+
+        <div class="top-bar-user">
+            <div class="avatar" id="userAvatar">O</div>
+            <div class="user-info">
+                <div class="name" sec:authentication="name" id="userName">Operario</div>
+                <div class="role">Operario · Turno activo</div>
+            </div>
+            <a th:href="@{/logout}" class="btn-logout">🚪 Salir</a>
+        </div>
+    </header>
+
+    <!-- ── POS BODY ──────────────────────────────── -->
+    <div class="pos-body">
+
+        <!-- ════════════════════════════════════════
+             PANEL IZQUIERDO
+        ════════════════════════════════════════ -->
+        <div class="left-panel">
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" id="tab-venta"
+                        onclick="switchTab('venta')" aria-label="Punto de venta">
+                    🛒 Venta
+                </button>
+                <button class="tab-btn" id="tab-recepcion"
+                        onclick="switchTab('recepcion')" aria-label="Recepción de mercancía">
+                    📥 Recepción
+                </button>
+                <button class="tab-btn" id="tab-consulta"
+                        onclick="switchTab('consulta')" aria-label="Consultar producto">
+                    🔍 Consultar
+                </button>
+            </div>
+
+            <!-- ══ TAB: VENTA ══════════════════════ -->
+            <div class="tab-content active" id="content-venta">
+
+                <!-- Búsqueda -->
+                <div class="search-area">
+                    <div class="search-row">
+                        <div class="search-input-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text"
+                                   id="searchVenta"
+                                   class="search-input"
+                                   placeholder="Buscar por nombre, SKU o código de barras..."
+                                   oninput="filterVentaProducts()"
+                                   autocomplete="off">
+                        </div>
+                        <button class="btn-scan" title="Escanear código de barras"
+                                onclick="activarEscaneo()">📷</button>
+                    </div>
+                    <!-- Filtros de categoría -->
+                    <div class="cat-pills" id="catPills">
+                        <span class="cat-pill active" data-cat="all" onclick="filterByCategory('all', this)">
+                            Todos
+                        </span>
+                        <!-- Generado dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Grid de productos -->
+                <div class="products-grid" id="ventaProductsGrid">
+                    <div class="empty-state">
+                        <div class="empty-icon">⏳</div>
+                        <p>Cargando productos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: RECEPCIÓN ══════════════════ -->
+            <div class="tab-content" id="content-recepcion">
+                <div class="recepcion-form">
+
+                    <!-- Datos de la recepción -->
+                    <div class="form-section">
+                        <div class="form-section-title">📦 Datos de la Recepción</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Proveedor</label>
+                                <input type="text"
+                                       id="rec-proveedor"
+                                       class="form-control"
+                                       placeholder="Nombre del proveedor">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">N° Documento</label>
+                                <input type="text"
+                                       id="rec-documento"
+                                       class="form-control"
+                                       placeholder="FAC-001234 / GR-5678">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha</label>
+                                <input type="date"
+                                       id="rec-fecha"
+                                       class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen dinámico -->
+                    <div class="recepcion-summary">
+                        <div class="summary-card">
+                            <div class="summary-value" id="rec-sum-prods">0</div>
+                            <div class="summary-label">Productos</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value" id="rec-sum-units">0</div>
+                            <div class="summary-label">Unidades</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value" id="rec-sum-costo">S/ 0.00</div>
+                            <div class="summary-label">Costo Total</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de ítems -->
+                    <div class="form-section">
+                        <div class="form-section-title">📋 Ítems a Recepcionar</div>
+                        <table class="recepcion-table" id="recepcionTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:36%">Producto</th>
+                                    <th style="width:14%">Cant.</th>
+                                    <th style="width:16%">P. Costo S/</th>
+                                    <th style="width:22%">Stock resultante</th>
+                                    <th style="width:12%"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="recepcionTbody">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                        <button class="btn-add-row" onclick="addRecepcionRow()">
+                            ➕ Agregar producto
+                        </button>
+                    </div>
+
+                    <!-- Botón confirmar -->
+                    <button class="btn-confirm-sale" id="btnConfirmarRecepcion"
+                            onclick="confirmarRecepcion()" style="margin-bottom:16px;">
+                        📥 Confirmar Recepción
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- ══ TAB: CONSULTA ═══════════════════ -->
+            <div class="tab-content" id="content-consulta">
+                <div class="search-area">
+                    <div class="search-row">
+                        <div class="search-input-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text"
+                                   id="searchConsulta"
+                                   class="search-input"
+                                   placeholder="Buscar producto para consultar..."
+                                   oninput="filterConsultaProducts()"
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                    <!-- Resultados rápidos de búsqueda consulta -->
+                    <div id="consultaQuickResults"
+                         style="display:none; position:relative; z-index:10;"></div>
+                </div>
+                <div class="consulta-area">
+                    <!-- Placeholder -->
+                    <div class="consulta-placeholder" id="consultaPlaceholder">
+                        <div class="ph-icon">🔍</div>
+                        <p>Escribe el nombre o SKU de un producto<br>para ver sus detalles, precio y ubicación.</p>
+                    </div>
+                    <!-- Detalle del producto -->
+                    <div class="product-detail-card" id="productDetailCard">
+                        <div class="product-detail-header">
+                            <div class="product-detail-icon" id="pdIcon">📦</div>
+                            <div class="product-detail-info">
+                                <div class="product-detail-name" id="pdName">—</div>
+                                <span class="product-detail-sku" id="pdSku">—</span>
+                            </div>
+                        </div>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-item-label">Precio Venta</div>
+                                <div class="detail-item-value price" id="pdPrecio">—</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-label">Precio + IGV 18%</div>
+                                <div class="detail-item-value price" id="pdPrecioIgv">—</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-label">Stock Disponible</div>
+                                <div class="detail-item-value" id="pdStock">—</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-label">Ubicación Almacén</div>
+                                <div class="detail-item-value location" id="pdUbicacion">—</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-label">Marca / Modelo</div>
+                                <div class="detail-item-value" id="pdMarca" style="font-size:13px;">—</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-label">Categoría</div>
+                                <div class="detail-item-value" id="pdCategoria" style="font-size:13px;">—</div>
+                            </div>
+                        </div>
+                        <!-- Últimos movimientos -->
+                        <div class="recent-moves">
+                            <div class="recent-moves-title">Últimos Movimientos</div>
+                            <div id="pdMovimientos">
+                                <div style="color:var(--text-muted);font-size:12px;padding:8px 0;">
+                                    Sin movimientos registrados
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-add-from-detail" id="btnAddFromDetail" onclick="addDetailProductToCart()">
+                            🛒 Agregar al carrito de venta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /left-panel -->
+
+        <!-- ════════════════════════════════════════
+             PANEL DERECHO — CARRITO
+        ════════════════════════════════════════ -->
+        <div class="right-panel">
+
+            <div class="cart-header">
+                <h2>🛒 Venta Actual
+                    <span id="cartCount"
+                          style="font-size:11px;background:var(--accent-glow);color:var(--accent);
+                                 padding:2px 8px;border-radius:10px;font-weight:700;display:none;">
+                        0
+                    </span>
+                </h2>
+                <div class="client-input-wrap">
+                    <span class="client-icon">👤</span>
+                    <input type="text"
+                           id="clienteName"
+                           class="client-input"
+                           placeholder="Cliente (opcional)">
+                </div>
+            </div>
+
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty" id="cartEmpty">
+                    <div class="ce-icon">🛒</div>
+                    <p>El carrito está vacío.<br>Selecciona un producto.</p>
+                </div>
+            </div>
+
+            <div class="cart-footer">
+                <!-- Totales -->
+                <div class="totals-section">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span id="subtotalDisplay">S/ 0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>IGV 18%</span>
+                        <span id="igvDisplay">S/ 0.00</span>
+                    </div>
+                    <div class="total-row main">
+                        <span>TOTAL</span>
+                        <span class="amount" id="totalDisplay">S/ 0.00</span>
+                    </div>
+                </div>
+
+                <!-- Efectivo y vuelto -->
+                <div class="cash-row" id="cashRow">
+                    <span class="cash-label">💵 Recibido</span>
+                    <input type="number"
+                           id="cashReceived"
+                           class="cash-input"
+                           placeholder="0.00"
+                           min="0"
+                           step="0.10"
+                           oninput="calcVuelto()">
+                    <div class="vuelto-badge" id="vueltoBadge">Vuelto: —</div>
+                </div>
+
+                <!-- Método de pago -->
+                <div class="payment-btns">
+                    <button class="pay-btn efectivo active-pay"
+                            id="pay-efectivo"
+                            onclick="selectPago('EFECTIVO')"
+                            aria-label="Pago en efectivo">
+                        <span class="pay-icon">💵</span>
+                        Efectivo
+                    </button>
+                    <button class="pay-btn yape"
+                            id="pay-yape"
+                            onclick="selectPago('YAPE')"
+                            aria-label="Pago con Yape o Plin">
+                        <span class="pay-icon">📱</span>
+                        Yape/Plin
+                    </button>
+                    <button class="pay-btn tarjeta"
+                            id="pay-tarjeta"
+                            onclick="selectPago('TARJETA')"
+                            aria-label="Pago con tarjeta">
+                        <span class="pay-icon">💳</span>
+                        Tarjeta
+                    </button>
+                </div>
+
+                <!-- Confirmar -->
+                <button class="btn-confirm-sale" id="btnConfirmSale"
+                        onclick="confirmarVenta()" disabled>
+                    ✅ Confirmar Venta
+                </button>
+                <button class="btn-cancel-sale" onclick="cancelarVenta()">
+                    ✕ Cancelar venta
+                </button>
+            </div>
+
+        </div><!-- /right-panel -->
+
+    </div><!-- /pos-body -->
+</div><!-- /pos-wrapper -->
+
+<!-- ══ MODAL: TICKET DE VENTA ══════════════════════ -->
+<div class="modal-overlay" id="ticketModal">
+    <div class="ticket-modal">
+        <div class="ticket-header">
+            <div class="ticket-check">✅</div>
+            <div class="ticket-title">¡Venta Exitosa!</div>
+            <div class="ticket-subtitle" id="ticketId">Folio: —</div>
+        </div>
+        <div class="ticket-body" id="ticketBody">
+            <!-- Generado dinámicamente -->
+        </div>
+        <div class="ticket-actions">
+            <button class="btn-nueva-venta" onclick="nuevaVenta()">
+                🛒 Nueva Venta
+            </button>
+            <button class="btn-cerrar-ticket" onclick="cerrarTicket()">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/operario.js}"></script>
+</body>
+</html>

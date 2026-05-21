@@ -17,7 +17,7 @@ public class PedidoDTO {
         PedidoDTO dto = new PedidoDTO();
         dto.setId(p.getId());
         dto.setNumeroPedido(p.getNumeroPedido());
-        dto.setCliente(p.getCliente());
+        dto.setCliente(p.getCliente() != null ? p.getCliente().getNombreCompleto() : "Cliente Desconocido");
         dto.setCantidadProductos(p.getCantidadProductos());
         dto.setTotal(p.getTotal());
         dto.setEstado(p.getEstado());

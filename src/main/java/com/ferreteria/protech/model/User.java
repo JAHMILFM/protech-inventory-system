@@ -25,6 +25,7 @@ public class User {
     private String username;
 
     @NotBlank(message = "La contraseña es obligatoria")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
@@ -51,6 +52,9 @@ public class User {
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
+    @Column(name = "empresa_representada", length = 100)
+    private String empresaRepresentada;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -60,6 +64,9 @@ public class User {
     }
 
     // ── Getters y Setters ───────────────────────────
+
+    public String getEmpresaRepresentada() { return empresaRepresentada; }
+    public void setEmpresaRepresentada(String empresaRepresentada) { this.empresaRepresentada = empresaRepresentada; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

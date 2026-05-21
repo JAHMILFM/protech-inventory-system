@@ -24,6 +24,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     @NotBlank(message = "El SKU es obligatorio")
     @Column(name = "sku", unique = true, nullable = false, length = 20)
     private String sku;
@@ -102,9 +105,15 @@ public class Product {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id")
     private Category categoria;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    private User proveedor;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -160,6 +169,9 @@ public class Product {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
@@ -229,6 +241,9 @@ public class Product {
 
     public Category getCategoria() { return categoria; }
     public void setCategoria(Category categoria) { this.categoria = categoria; }
+
+    public User getProveedor() { return proveedor; }
+    public void setProveedor(User proveedor) { this.proveedor = proveedor; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

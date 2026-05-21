@@ -37,6 +37,8 @@ public class ProductDTO {
     private boolean stockCritico;
     private Long categoriaId;
     private String categoriaNombre;
+    private Long proveedorId;
+    private String proveedorNombre;
     private String createdAt;
     private String updatedAt;
 
@@ -73,6 +75,10 @@ public class ProductDTO {
         if (p.getCategoria() != null) {
             dto.categoriaId = p.getCategoria().getId();
             dto.categoriaNombre = p.getCategoria().getNombre();
+        }
+        if (p.getProveedor() != null) {
+            dto.proveedorId = p.getProveedor().getId();
+            dto.proveedorNombre = p.getProveedor().getNombreCompleto();
         }
         dto.createdAt = p.getCreatedAt() != null ? p.getCreatedAt().toString() : null;
         dto.updatedAt = p.getUpdatedAt() != null ? p.getUpdatedAt().toString() : null;
@@ -173,4 +179,10 @@ public class ProductDTO {
 
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getProveedorId() { return proveedorId; }
+    public void setProveedorId(Long proveedorId) { this.proveedorId = proveedorId; }
+
+    public String getProveedorNombre() { return proveedorNombre; }
+    public void setProveedorNombre(String proveedorNombre) { this.proveedorNombre = proveedorNombre; }
 }

@@ -22,6 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByCategoriaId(Long categoriaId);
 
+    List<Product> findByProveedorId(Long proveedorId);
+
     @Query("SELECT p FROM Product p WHERE p.activo = true AND p.stockActual <= p.stockMinimo")
     List<Product> findProductosStockCritico();
 

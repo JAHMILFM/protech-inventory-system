@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Pro-Tech Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/checkout.css}">
+    <link rel="stylesheet" th:href="@{/css/concurrency-ui.css}">
+</head>
+<body>
+
+    <!-- Sticky Timer Bar -->
+    <div class="sticky-timer-bar active" id="stickyTimerBar">
+        <div class="timer-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="timer-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div class="timer-text">
+                <span>Tu carrito está reservado por</span>
+                <span class="countdown-clock" id="countdownClock">15:00</span>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <a href="/tienda" class="brand">PRO-TECH<span>STORE</span></a>
+    </header>
+
+    <div class="checkout-container">
+        
+        <div class="checkout-main">
+            <!-- 1. Dirección de Envío -->
+            <section class="checkout-section">
+                <h2>1. Dirección de Envío</h2>
+                <div class="form-group">
+                    <label>Dirección completa</label>
+                    <input type="text" id="direccion" class="form-control" placeholder="Ej. Av. Larco 123, Miraflores, Lima" required>
+                </div>
+            </section>
+
+            <!-- 2. Método de Pago (Tarjeta Simulada) -->
+            <section class="checkout-section">
+                <h2>2. Método de Pago (Tarjeta de Crédito)</h2>
+                
+                <!-- Tarjeta Interactiva -->
+                <div class="cc-wrapper">
+                    <div class="cc-card" id="ccCard">
+                        <div class="cc-front">
+                            <div class="cc-chip"></div>
+                            <div class="cc-number-display" id="ccNumDisplay">#### #### #### ####</div>
+                            <div class="cc-details">
+                                <div>
+                                    <span style="font-size:0.6rem;display:block">TITULAR</span>
+                                    <span class="cc-name-display" id="ccNameDisplay">NOMBRE DEL TITULAR</span>
+                                </div>
+                                <div>
+                                    <span style="font-size:0.6rem;display:block">VENCE</span>
+                                    <span id="ccExpDisplay">MM/YY</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cc-back">
+                            <div class="cc-stripe"></div>
+                            <div>
+                                <span style="font-size:0.6rem;display:block;text-align:right">CVV</span>
+                                <div class="cc-cvv-box" id="ccCvvDisplay">***</div>
+                            </div>
+                            <div style="font-size:0.5rem; text-align:center; margin-top:1rem; opacity:0.5">
+                                Pro-Tech Store no almacena tus datos reales. Esta es una pasarela segura simulada.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <div class="form-group">
+                    <label>Número de Tarjeta</label>
+                    <input type="text" id="ccNumber" class="form-control" maxlength="19" placeholder="0000 0000 0000 0000">
+                    <div id="luhnError" style="color:var(--danger); font-size:0.8rem; margin-top:4px; display:none;">Número de tarjeta inválido.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nombre del Titular</label>
+                    <input type="text" id="ccName" class="form-control" placeholder="COMO APARECE EN LA TARJETA">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vencimiento (MM/YY)</label>
+                        <input type="text" id="ccExp" class="form-control" maxlength="5" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="password" id="ccCvv" class="form-control" maxlength="4" placeholder="123">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside>
+            <div class="summary-section">
+                <h3>Resumen de tu pedido</h3>
+                <div class="summary-items" id="summaryItems">
+                    <!-- Dinámico -->
+                </div>
+                <div class="s-item">
+                    <span>Subtotal</span>
+                    <span id="summarySubtotal">S/ 0.00</span>
+                </div>
+                <div class="s-item">
+                    <span>Envío</span>
+                    <span>S/ 15.00</span>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin: 1rem 0;">
+                <div class="s-total">
+                    <span>TOTAL</span>
+                    <span id="summaryTotal">S/ 0.00</span>
+                </div>
+                
+                <button class="btn-pay" id="btnPay" disabled>PROCESANDO...</button>
+                <div id="payError" style="color:var(--danger); font-size:0.8rem; margin-top:0.5rem; text-align:center; display:none;"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modal de Error / Recuperación (Tiempo Expirado) -->
+    <div class="modal-overlay" id="expiredModal">
+        <div class="modal-card">
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2 class="modal-title">¡Vaya! El inventario ha cambiado</h2>
+            <p class="modal-desc">El tiempo de reserva expiró o alguien más adquirió las últimas unidades. No te preocupes, tenemos excelentes alternativas para ti.</p>
+            
+            <div class="modal-actions">
+                <button class="btn-primary-modal" onclick="window.location.href='/tienda'">Ver productos similares</button>
+            </div>
+            
+            <div class="notify-section">
+                <p>O déjanos tu correo y te avisaremos cuando haya stock:</p>
+                <div class="notify-input-group">
+                    <input type="email" placeholder="tu@correo.com" class="notify-input">
+                    <button class="btn-secondary-modal" onclick="alert('¡Te avisaremos pronto!')">Avisarme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de lógica de UI y Fetch -->
+    <script th:src="@{/js/checkout.js}"></script>
+</body>
+</html>

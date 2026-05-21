@@ -46,13 +46,16 @@ public class Category {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "padre_id")
     private Category padre;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "padre", fetch = FetchType.LAZY)
     private List<Category> hijos = new ArrayList<>();
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
     private List<Product> productos = new ArrayList<>();
 
@@ -106,6 +109,11 @@ public class Category {
 
     public Category getPadre() { return padre; }
     public void setPadre(Category padre) { this.padre = padre; }
+
+    @Transient
+    public Long getParentId() {
+        return padre != null ? padre.getId() : null;
+    }
 
     public List<Category> getHijos() { return hijos; }
     public void setHijos(List<Category> hijos) { this.hijos = hijos; }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Tech Store | Materiales y Herramientas</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- E-Commerce Styles -->
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+    <link rel="stylesheet" th:href="@{/css/concurrency-ui.css}">
+</head>
+<body>
+
+    <!-- Sticky Timer Bar -->
+    <div class="sticky-timer-bar" id="stickyTimerBar">
+        <div class="timer-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="timer-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div class="timer-text">
+                <span>Tu carrito está reservado por</span>
+                <span class="countdown-clock" id="countdownClock">15:00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Retail -->
+    <header>
+        <div class="header-top">
+            <a href="/tienda" class="brand">PRO-TECH<span>STORE</span></a>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar productos, marcas, herramientas...">
+                <button class="search-btn">Buscar</button>
+            </div>
+
+            <div class="header-actions">
+                <div th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/cliente/mis-pedidos}" class="action-link">
+                        👤 <span th:text="${#authentication.name}">Mi Cuenta</span>
+                    </a>
+                </div>
+                <div th:unless="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/login}" class="action-link">👤 Ingresar</a>
+                </div>
+                
+                <button class="cart-btn" id="openCartBtn">
+                    🛒
+                    <div class="cart-badge" id="cartBadge">0</div>
+                </button>
+            </div>
+        </div>
+
+        <nav class="nav-categories">
+            <ul id="navCategoryList">
+                <li class="active" data-id="all">Todos los Productos</li>
+                <!-- Dinámico desde JS -->
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar">
+            <h3>Filtros</h3>
+            
+            <div style="margin-top: 1rem;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">Categoría</h4>
+                <ul id="sidebarCategoryList" style="list-style: none; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- JS rellena esto -->
+                </ul>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">Disponibilidad</h4>
+                <label style="display: flex; gap: 0.5rem; font-size: 0.9rem;">
+                    <input type="checkbox" checked disabled> Solo con Stock
+                </label>
+            </div>
+        </aside>
+
+        <!-- Products Area -->
+        <main class="products-area">
+            <h2 id="categoryTitle">Todos los Productos</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- Skeletons placeholders -->
+                <div class="product-card skeleton" style="height: 380px;"></div>
+                <div class="product-card skeleton" style="height: 380px;"></div>
+                <div class="product-card skeleton" style="height: 380px;"></div>
+                <div class="product-card skeleton" style="height: 380px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Cart Off-Canvas -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h2>Mi Carrito</h2>
+            <button class="close-cart" id="closeCartBtn">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <!-- Dinámico desde JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total a Pagar:</span>
+                <span id="cartTotal">S/ 0.00</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">Ir a Pagar</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMessage">Producto añadido</span>
+    </div>
+
+    <script th:src="@{/js/tienda.js}"></script>
+</body>
+</html>

@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Inicializador de datos de ejemplo para la aplicación.
@@ -23,6 +26,7 @@ public class DataInitializer {
                                CategoryRepository catRepo,
                                ProductRepository prodRepo,
                                PedidoRepository pedRepo,
+                               OrdenCompraRepository ocRepo,
                                KardexRepository kardexRepo,
                                PasswordEncoder encoder) {
         return args -> {
@@ -41,8 +45,11 @@ public class DataInitializer {
             }
 
             // ── Crear Usuarios si no existen ───────────
+            Role adminRole = roleRepo.findByNombre("ADMIN").orElseThrow();
+            Role opRole = roleRepo.findByNombre("OPERARIO").orElseThrow();
+            Role provRole = roleRepo.findByNombre("PROVEEDOR").orElseThrow();
+
             if (!userRepo.existsByUsername("admin")) {
-                Role adminRole = roleRepo.findByNombre("ADMIN").orElseThrow();
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setPassword(encoder.encode("admin123"));
@@ -53,7 +60,7 @@ public class DataInitializer {
                 userRepo.save(admin);
             }
             if (!userRepo.existsByUsername("operario1")) {
-                Role opRole = roleRepo.findByNombre("OPERARIO").orElseThrow();
+                opRole = roleRepo.findByNombre("OPERARIO").orElseThrow();
                 User op1 = new User();
                 op1.setUsername("operario1");
                 op1.setPassword(encoder.encode("op123"));
@@ -63,7 +70,7 @@ public class DataInitializer {
                 userRepo.save(op1);
             }
             if (!userRepo.existsByUsername("operario2")) {
-                Role opRole = roleRepo.findByNombre("OPERARIO").orElseThrow();
+                opRole = roleRepo.findByNombre("OPERARIO").orElseThrow();
                 User op2 = new User();
                 op2.setUsername("operario2");
                 op2.setPassword(encoder.encode("op123"));
@@ -71,6 +78,29 @@ public class DataInitializer {
                 op2.setEmail("mgarcia@protech.com");
                 op2.setRoles(Set.of(opRole));
                 userRepo.save(op2);
+            }
+
+            if (!userRepo.existsByUsername("stanley_prov")) {
+                User prov1 = new User();
+                prov1.setUsername("stanley_prov");
+                prov1.setPassword(encoder.encode("stanley123"));
+                prov1.setNombreCompleto("Stanley Tools Perú");
+                prov1.setEmail("ventas@stanley.com");
+                prov1.setTelefono("555-123-456");
+                prov1.setEmpresaRepresentada("Stanley");
+                prov1.setRoles(Set.of(provRole));
+                userRepo.save(prov1);
+            }
+
+            if (!userRepo.existsByUsername("cliente1")) {
+                Role clienteRole = roleRepo.findByNombre("CLIENTE").orElseThrow();
+                User c1 = new User();
+                c1.setUsername("cliente1");
+                c1.setPassword(encoder.encode("cliente123"));
+                c1.setNombreCompleto("Constructora Lima SAC");
+                c1.setEmail("compras@constructorast.com");
+                c1.setRoles(Set.of(clienteRole));
+                userRepo.save(c1);
             }
 
             // ── Crear Categorías si no existen ─────────────
@@ -142,63 +172,98 @@ public class DataInitializer {
 
                 // ── Crear Productos de Ejemplo ─────────────
                 if (prodRepo.count() == 0) {
+                    User prov1 = userRepo.findByUsername("stanley_prov").orElse(null);
+
                     crearProducto(prodRepo, "FPT-001", "7501234567890", "Martillo de Uña 16oz Stanley",
                             new BigDecimal("25.00"), new BigDecimal("45.90"), 150, 20,
-                            "Stanley", "51-621", "1", "A", "3", manuales);
+                            "Stanley", "51-621", "1", "A", "3", manuales, prov1);
 
                     crearProducto(prodRepo, "FPT-002", "7501234567891", "Destornillador Phillips #2 Stanley",
                             new BigDecimal("8.50"), new BigDecimal("15.90"), 200, 30,
-                            "Stanley", "69-262", "1", "A", "2", manuales);
+                            "Stanley", "69-262", "1", "A", "2", manuales, prov1);
 
                     crearProducto(prodRepo, "FPT-003", "7501234567892", "Taladro Percutor 1/2\" DeWalt 750W",
                             new BigDecimal("185.00"), new BigDecimal("349.90"), 35, 5,
-                            "DeWalt", "DWD024", "2", "B", "1", electricas);
+                            "DeWalt", "DWD024", "2", "B", "1", electricas, null);
 
                     crearProducto(prodRepo, "FPT-004", "7501234567893", "Amoladora 4-1/2\" Bosch 850W",
                             new BigDecimal("120.00"), new BigDecimal("229.90"), 28, 5,
-                            "Bosch", "GWS850", "2", "B", "2", electricas);
+                            "Bosch", "GWS850", "2", "B", "2", electricas, null);
 
                     crearProducto(prodRepo, "FPT-005", "7501234567894", "Cable THW 14 AWG Negro (100m)",
                             new BigDecimal("45.00"), new BigDecimal("89.90"), 80, 15,
-                            "Indeco", "THW-14N", "3", "C", "1", cables);
+                            "Indeco", "THW-14N", "3", "C", "1", cables, null);
 
                     crearProducto(prodRepo, "FPT-006", "7501234567895", "Tubo PVC 1/2\" x 5m Presión",
                             new BigDecimal("4.50"), new BigDecimal("8.90"), 300, 50,
-                            "Pavco", "PVC-12P", "4", "A", "1", tuberias);
+                            "Pavco", "PVC-12P", "4", "A", "1", tuberias, null);
 
                     crearProducto(prodRepo, "FPT-007", "7501234567896", "Llave Francesa 10\" Truper",
                             new BigDecimal("18.00"), new BigDecimal("34.90"), 60, 10,
-                            "Truper", "LF-10", "1", "A", "4", manuales);
+                            "Truper", "LF-10", "1", "A", "4", manuales, null);
 
                     crearProducto(prodRepo, "FPT-008", "7501234567897", "Sierra Circular 7-1/4\" Makita",
                             new BigDecimal("230.00"), new BigDecimal("419.90"), 15, 3,
-                            "Makita", "5007N", "2", "B", "3", electricas);
+                            "Makita", "5007N", "2", "B", "3", electricas, null);
 
                     crearProducto(prodRepo, "FPT-009", "7501234567898", "Cinta Aislante Negra 3M",
                             new BigDecimal("2.80"), new BigDecimal("5.90"), 500, 100,
-                            "3M", "1711", "3", "C", "2", cables);
+                            "3M", "1711", "3", "C", "2", cables, null);
 
                     crearProducto(prodRepo, "FPT-010", "7501234567899", "Llave Mixta Set 12 pzas Truper",
                             new BigDecimal("45.00"), new BigDecimal("89.90"), 40, 8,
-                            "Truper", "LM-12S", "1", "B", "2", manuales);
+                            "Truper", "LM-12S", "1", "B", "2", manuales, null);
 
                     // Productos con stock crítico para demostración
                     crearProducto(prodRepo, "FPT-011", "7501234567900", "Disco Diamante 4\" Bosch",
                             new BigDecimal("22.00"), new BigDecimal("42.90"), 3, 10,
-                            "Bosch", "DD-4B", "2", "C", "1", electricas);
+                            "Bosch", "DD-4B", "2", "C", "1", electricas, null);
 
                     crearProducto(prodRepo, "FPT-012", "7501234567901", "Nivel de Burbuja 24\" Stanley",
                             new BigDecimal("15.00"), new BigDecimal("29.90"), 2, 5,
-                            "Stanley", "42-074", "1", "A", "5", manuales);
+                            "Stanley", "42-074", "1", "A", "5", manuales, prov1);
+                }
+            }
+            
+            // PATCH: Asignar proveedor a productos existentes de Stanley si no tienen
+            User provStanley = userRepo.findByUsername("stanley_prov").orElse(null);
+            if (provStanley != null) {
+                List<Product> productosStanleyExistentes = prodRepo.findAll().stream()
+                        .filter(p -> "Stanley".equalsIgnoreCase(p.getMarca()) && p.getProveedor() == null)
+                        .collect(Collectors.toList());
+                for (Product p : productosStanleyExistentes) {
+                    p.setProveedor(provStanley);
+                    prodRepo.save(p);
                 }
             }
 
             // ── Crear Pedidos si no existen ─────────────
             if (pedRepo.count() == 0) {
-                crearPedido(pedRepo, "PED-001", "Constructora Lima SAC", 3, new BigDecimal("1250.00"), "Pendiente");
-                crearPedido(pedRepo, "PED-002", "Ferretería El Sol", 5, new BigDecimal("890.50"), "Pendiente");
-                crearPedido(pedRepo, "PED-003", "Taller Mecánico Norte", 2, new BigDecimal("445.00"), "Pendiente");
-                crearPedido(pedRepo, "PED-004", "Distribuciones García", 8, new BigDecimal("3200.00"), "Completado");
+                User cliente1 = userRepo.findByUsername("cliente1").orElseThrow();
+                List<Product> todos = prodRepo.findAll();
+                
+                if (todos.size() >= 3) {
+                    crearPedido(pedRepo, "PED-001", cliente1, List.of(todos.get(0), todos.get(1)), "Pendiente");
+                    crearPedido(pedRepo, "PED-002", cliente1, List.of(todos.get(2)), "Pendiente");
+                    crearPedido(pedRepo, "PED-003", cliente1, List.of(todos.get(0), todos.get(2)), "Pendiente");
+                    crearPedido(pedRepo, "PED-004", cliente1, List.of(todos.get(1)), "Completado");
+                }
+            }
+
+            // ── Crear Órdenes de Compra (B2B) si no existen ─────────────
+            if (ocRepo.count() == 0) {
+                User prov1 = userRepo.findByUsername("stanley_prov").orElse(null);
+                if (prov1 != null) {
+                    List<Product> productosStanley = prodRepo.findAll().stream()
+                        .filter(p -> p.getProveedor() != null && p.getProveedor().getId().equals(prov1.getId()))
+                        .collect(Collectors.toList());
+                        
+                    if (!productosStanley.isEmpty()) {
+                        crearOrdenCompra(ocRepo, "OC-2023-089", prov1, productosStanley, "PENDIENTE");
+                        crearOrdenCompra(ocRepo, "OC-2023-090", prov1, List.of(productosStanley.get(0)), "EN_TRANSITO");
+                        crearOrdenCompra(ocRepo, "OC-2023-085", prov1, productosStanley, "RECIBIDO");
+                    }
+                }
             }
 
             // ── Crear Kardex (Movimientos) si no existen ─────────────
@@ -223,7 +288,7 @@ public class DataInitializer {
     private void crearProducto(ProductRepository repo, String sku, String ean, String nombre,
                                 BigDecimal costo, BigDecimal venta, int stock, int stockMin,
                                 String marca, String modelo, String pasillo, String lado,
-                                String nivel, Category categoria) {
+                                String nivel, Category categoria, User proveedor) {
         Product p = new Product();
         p.setSku(sku);
         p.setEan13(ean);
@@ -240,16 +305,30 @@ public class DataInitializer {
         p.setUbicacionNivel(nivel);
         p.setCategoria(categoria);
         p.setUnidadMedida("UND");
+        if (proveedor != null) {
+            p.setProveedor(proveedor);
+        }
         repo.save(p);
     }
 
-    private void crearPedido(PedidoRepository repo, String num, String cliente, int cant, BigDecimal total, String estado) {
+    private void crearPedido(PedidoRepository repo, String num, User cliente, List<Product> productos, String estado) {
         Pedido p = new Pedido();
         p.setNumeroPedido(num);
         p.setCliente(cliente);
-        p.setCantidadProductos(cant);
-        p.setTotal(total);
         p.setEstado(estado);
+        
+        BigDecimal total = BigDecimal.ZERO;
+        for (Product prod : productos) {
+            PedidoDetalle det = new PedidoDetalle();
+            det.setPedido(p);
+            det.setProducto(prod);
+            det.setCantidad(2);
+            det.setPrecioUnitario(prod.getPrecioVenta());
+            det.setSubtotal(prod.getPrecioVenta().multiply(new BigDecimal(2)));
+            p.getDetalles().add(det);
+            total = total.add(det.getSubtotal());
+        }
+        p.setTotal(total);
         repo.save(p);
     }
 
@@ -268,5 +347,26 @@ public class DataInitializer {
         k.setProveedor(proveedor);
         k.setUsuario(usuario);
         kardexRepo.save(k);
+    }
+
+    private void crearOrdenCompra(OrdenCompraRepository repo, String num, User prov, List<Product> productos, String estado) {
+        OrdenCompra oc = new OrdenCompra();
+        oc.setNumeroOrden(num);
+        oc.setProveedor(prov);
+        oc.setEstado(estado);
+        
+        BigDecimal total = BigDecimal.ZERO;
+        for (Product prod : productos) {
+            OrdenCompraDetalle det = new OrdenCompraDetalle();
+            det.setOrdenCompra(oc);
+            det.setProducto(prod);
+            det.setCantidad(10);
+            det.setPrecioUnitario(prod.getPrecioCosto());
+            det.setSubtotal(prod.getPrecioCosto().multiply(new BigDecimal(10)));
+            oc.getDetalles().add(det);
+            total = total.add(det.getSubtotal());
+        }
+        oc.setTotal(total);
+        repo.save(oc);
     }
 }
