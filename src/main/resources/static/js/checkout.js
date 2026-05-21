@@ -204,15 +204,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('stickyTimerBar').classList.remove('active');
                 
                 // Efecto de éxito
-                document.querySelector('.checkout-main').innerHTML = `
-                    <div style="text-align:center; padding: 4rem 2rem; background:white; border-radius:8px; box-shadow:0 1px 2px rgba(0,0,0,0.05)">
-                        <h1 style="font-size:4rem; margin-bottom:1rem">🎉</h1>
-                        <h2 style="color:var(--success); margin-bottom:1rem">¡Pago Aprobado!</h2>
-                        <p style="color:var(--text-muted); margin-bottom:2rem">Tu pedido <strong>${data.numeroPedido}</strong> ha sido confirmado y está en preparación.</p>
-                        <a href="/tienda" class="btn-pay" style="text-decoration:none; display:inline-block; width:auto; padding: 1rem 2rem">VOLVER A LA TIENDA</a>
+                document.querySelector('.checkout-wrapper').innerHTML = `
+                    <div style="text-align:center; padding: 4rem 2rem; background:white; border-radius:12px; box-shadow:var(--shadow-md); grid-column: 1 / -1; margin: 40px auto; max-width: 600px;">
+                        <h1 style="font-size:5rem; margin-bottom:1rem">🎉</h1>
+                        <h2 style="color:var(--success); margin-bottom:1rem; font-size: 2rem;">¡Pago Aprobado!</h2>
+                        <p style="color:var(--text-muted); margin-bottom:2rem; font-size: 1.1rem;">Tu pedido <strong>${data.numeroPedido}</strong> ha sido confirmado y está en preparación.</p>
+                        <a href="/tienda" class="btn btn-primary" style="display:inline-block; padding: 16px 32px; text-decoration:none;">VOLVER A LA TIENDA</a>
                     </div>
                 `;
-                document.querySelector('aside').style.display = 'none';
             } else {
                 if (res.status === 401) {
                     window.location.href = '/login';

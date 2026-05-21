@@ -3,123 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro-Tech Store | Materiales y Herramientas</title>
+    <title>Pro-Tech Store | Premium E-Commerce</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <!-- E-Commerce Styles -->
-    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- UI Kit & Styles -->
+    <link rel="stylesheet" th:href="@{/css/uikit-premium.css}">
     <link rel="stylesheet" th:href="@{/css/concurrency-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
 </head>
 <body>
 
-    <!-- Sticky Timer Bar -->
-    <div class="sticky-timer-bar" id="stickyTimerBar">
-        <div class="timer-content">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="timer-icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <div class="timer-text">
-                <span>Tu carrito está reservado por</span>
-                <span class="countdown-clock" id="countdownClock">15:00</span>
-            </div>
-        </div>
-    </div>
+    <!-- Sticky Timer Removed from Store Page based on User Request -->
 
-    <!-- Header Retail -->
-    <header>
+    <!-- Header Premium -->
+    <header class="header-premium">
         <div class="header-top">
-            <a href="/tienda" class="brand">PRO-TECH<span>STORE</span></a>
+            <a href="/tienda" class="brand-logo">PRO-TECH<span>STORE</span></a>
             
-            <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Buscar productos, marcas, herramientas...">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="Busca herramientas, materiales, marcas...">
                 <button class="search-btn">Buscar</button>
             </div>
 
             <div class="header-actions">
                 <div th:if="${#authorization.expression('isAuthenticated()')}">
-                    <a th:href="@{/cliente/mis-pedidos}" class="action-link">
-                        👤 <span th:text="${#authentication.name}">Mi Cuenta</span>
+                    <a href="#" onclick="showToast('Sección en construcción', false)" class="action-link">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span th:text="${#authentication.name}">Mi Cuenta</span>
                     </a>
                 </div>
                 <div th:unless="${#authorization.expression('isAuthenticated()')}">
-                    <a th:href="@{/login}" class="action-link">👤 Ingresar</a>
+                    <a th:href="@{/login}" class="action-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Ingresar
+                    </a>
                 </div>
                 
-                <button class="cart-btn" id="openCartBtn">
-                    🛒
+                <button class="cart-icon-wrapper" id="openCartBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <div class="cart-badge" id="cartBadge">0</div>
                 </button>
             </div>
         </div>
-
-        <nav class="nav-categories">
-            <ul id="navCategoryList">
+        <div class="nav-bottom">
+            <ul class="nav-links" id="navCategoryList">
                 <li class="active" data-id="all">Todos los Productos</li>
-                <!-- Dinámico desde JS -->
+                <!-- Dinámico -->
             </ul>
-        </nav>
+        </div>
     </header>
 
-    <!-- Main Content -->
-    <div class="main-container">
-        <!-- Sidebar Filters -->
-        <aside class="filters-sidebar">
-            <h3>Filtros</h3>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-banner">
+            <h1 class="hero-title">Herramientas<br>Profesionales</h1>
+            <p class="hero-subtitle">Equipa tus proyectos con la mejor tecnología y resistencia. Stock limitado con envíos inmediatos.</p>
+            <button class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 32px;" onclick="window.scrollTo({top: 600, behavior: 'smooth'})">Explorar Catálogo</button>
+        </div>
+    </section>
+
+    <!-- Main Layout Grid -->
+    <div class="store-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar-filters">
+            <h3 class="filter-group-title">Categorías</h3>
+            <ul class="filter-list" id="sidebarCategoryList">
+                <!-- JS rellena -->
+            </ul>
             
-            <div style="margin-top: 1rem;">
-                <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">Categoría</h4>
-                <ul id="sidebarCategoryList" style="list-style: none; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <!-- JS rellena esto -->
-                </ul>
-            </div>
-            
-            <div style="margin-top: 1.5rem;">
-                <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">Disponibilidad</h4>
-                <label style="display: flex; gap: 0.5rem; font-size: 0.9rem;">
-                    <input type="checkbox" checked disabled> Solo con Stock
-                </label>
-            </div>
+            <h3 class="filter-group-title" style="margin-top: 24px;">Disponibilidad</h3>
+            <label style="display: flex; gap: 8px; font-size: 0.95rem; cursor: pointer; align-items: center;">
+                <input type="checkbox" checked disabled> Solo disponibles
+            </label>
         </aside>
 
-        <!-- Products Area -->
-        <main class="products-area">
-            <h2 id="categoryTitle">Todos los Productos</h2>
+        <!-- Products -->
+        <main>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-4);">
+                <h2 id="categoryTitle">Todos los Productos</h2>
+            </div>
             <div class="products-grid" id="productsGrid">
-                <!-- Skeletons placeholders -->
-                <div class="product-card skeleton" style="height: 380px;"></div>
-                <div class="product-card skeleton" style="height: 380px;"></div>
-                <div class="product-card skeleton" style="height: 380px;"></div>
-                <div class="product-card skeleton" style="height: 380px;"></div>
+                <!-- Skeletons -->
+                <div class="product-card skeleton" style="height: 400px;"></div>
+                <div class="product-card skeleton" style="height: 400px;"></div>
+                <div class="product-card skeleton" style="height: 400px;"></div>
             </div>
         </main>
     </div>
 
-    <!-- Cart Off-Canvas -->
+    <!-- PDP Modal (Product Detail Page Offcanvas) -->
+    <div class="pdp-overlay" id="pdpOverlay">
+        <div class="pdp-modal" id="pdpModal">
+            <button class="pdp-close" id="pdpCloseBtn">&times;</button>
+            
+            <div class="pdp-gallery">
+                <img id="pdpImage" src="" alt="Product Image">
+            </div>
+            
+            <div class="pdp-details">
+                <div class="pdp-brand" id="pdpBrand">MARCA</div>
+                <h1 class="pdp-title" id="pdpTitle">Nombre del Producto</h1>
+                <div class="pdp-sku" id="pdpSku">SKU: 00000</div>
+                
+                <div id="pdpStockAlertContainer"></div>
+                
+                <div class="pdp-price">
+                    S/ <span id="pdpCurrentPrice">0.00</span>
+                    <span class="pdp-price-old" id="pdpOldPrice">S/ 0.00</span>
+                </div>
+                
+                <p class="pdp-description" id="pdpDescription">Descripción detallada del producto.</p>
+                
+                <div class="pdp-actions">
+                    <button class="btn btn-primary btn-giant" id="pdpAddToCartBtn">Añadir al Carrito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Drawer Offcanvas -->
     <div class="cart-overlay" id="cartOverlay"></div>
     <div class="cart-drawer" id="cartDrawer">
         <div class="cart-header">
-            <h2>Mi Carrito</h2>
+            <h2 style="font-weight: 800;">Mi Carrito</h2>
             <button class="close-cart" id="closeCartBtn">&times;</button>
         </div>
         <div class="cart-items" id="cartItemsContainer">
-            <!-- Dinámico desde JS -->
+            <!-- Dinámico -->
         </div>
         <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Total a Pagar:</span>
-                <span id="cartTotal">S/ 0.00</span>
+            <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 900; margin-bottom: 16px;">
+                <span>Total:</span>
+                <span id="cartTotal" style="color: var(--brand-accent);">S/ 0.00</span>
             </div>
-            <button class="checkout-btn" id="checkoutBtn">Ir a Pagar</button>
+            <button class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 16px;" id="checkoutBtn">COMPLETAR COMPRA SEGURA</button>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <span id="toastIcon">✅</span>
-        <span id="toastMessage">Producto añadido</span>
+    <div id="toast" class="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
     </div>
 
     <script th:src="@{/js/tienda.js}"></script>

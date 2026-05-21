@@ -52,7 +52,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/registro", "/css/**", "/js/**", "/images/**", "/tienda", "/api/tienda/productos", "/api/tienda/categorias").permitAll()
                 .requestMatchers("/api/productos/**", "/api/categorias/**", "/api/auth/**").permitAll()
-                .requestMatchers("/tienda/checkout", "/api/tienda/checkout", "/mis-compras").hasRole("CLIENTE")
+                .requestMatchers("/tienda/checkout", "/api/tienda/checkout", "/mis-compras", "/cliente/**").authenticated()
                 .requestMatchers("/operario/**", "/api/ventas/**").hasRole("OPERARIO")
                 .requestMatchers("/proveedor/**", "/api/proveedor/**").hasRole("PROVEEDOR")
                 .requestMatchers("/api/kardex/**").hasAnyRole("ADMIN", "OPERARIO")

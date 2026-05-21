@@ -104,44 +104,86 @@ document.addEventListener('DOMContentLoaded', () => {
             // Calculate old price (fake discount for UI realism)
             const oldPrice = (p.precioVenta * 1.2).toFixed(2);
 
-            // Alerta de Stock (PDP)
-            let stockAlertHtml = '';
+            // Alerta de Stock (Grid)
+            let stockHtml = '';
             if (p.stockActual > 0 && p.stockActual <= 5) {
-                stockAlertHtml = `
-                <div class="stock-alert">
-                    <span class="pulse-dot"></span>
-                    <span class="stock-text">¡Apresúrate! Solo quedan <strong class="stock-count">${p.stockActual}</strong> u.</span>
-                </div>`;
+                stockHtml = `<div class="badge badge-warning" style="position:absolute; top:16px; right:16px; z-index:2;">¡Solo ${p.stockActual}!</div>`;
             } else if (p.stockActual === 0) {
-                stockAlertHtml = `<div class="stock-alert" style="background:#fee2e2; color:#b91c1c; border-color:#fecaca;">AGOTADO</div>`;
+                stockHtml = `<div class="badge badge-danger" style="position:absolute; top:16px; right:16px; z-index:2;">AGOTADO</div>`;
             }
 
             div.innerHTML = `
-                <div class="product-img-wrapper">
-                    <img src="${imageUrl}" alt="${p.nombre}" class="product-img" loading="lazy">
-                    <div class="product-brand">${p.marca || 'GENÉRICO'}</div>
+                ${stockHtml}
+                <div class="card-img-wrap" onclick="openPDP(${p.id})">
+                    <img src="${imageUrl}" alt="${p.nombre}" loading="lazy">
                 </div>
-                <div class="product-info">
-                    <div class="product-title" title="${p.nombre}">${p.nombre}</div>
-                    <div class="product-sku">SKU: ${p.sku || 'N/A'}</div>
-                    ${stockAlertHtml}
-                    
-                    <div class="price-container">
-                        <div class="price-old">S/ ${oldPrice}</div>
-                        <div class="price-current">
-                            <span class="price-currency">S/</span>
-                            <span>${integerPart}</span>
-                            <span class="price-cents">.${decimalPart}</span>
-                        </div>
-                    </div>
-                    
-                    <button class="add-btn" onclick="addToCart(${p.id})">
-                        🛒 Agregar al carro
-                    </button>
+                <div class="card-brand">${p.marca || 'GENÉRICO'}</div>
+                <div class="card-title" title="${p.nombre}" onclick="openPDP(${p.id})">${p.nombre}</div>
+                
+                <div class="card-price-row">
+                    <div class="price-current">S/ ${integerPart}.${decimalPart}</div>
+                    <div class="price-old">S/ ${oldPrice}</div>
                 </div>
+                
+                <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.id})">
+                    Añadir al Carrito
+                </button>
             `;
             grid.appendChild(div);
         });
+    }
+
+    // --- PDP MODAL LOGIC ---
+    const pdpOverlay = document.getElementById('pdpOverlay');
+    const pdpModal = document.getElementById('pdpModal');
+    const pdpCloseBtn = document.getElementById('pdpCloseBtn');
+    
+    pdpCloseBtn.addEventListener('click', closePDP);
+    pdpOverlay.addEventListener('click', (e) => {
+        if (e.target === pdpOverlay) closePDP();
+    });
+
+    window.openPDP = function(id) {
+        const p = allProducts.find(x => x.id === id);
+        if(!p) return;
+        
+        document.getElementById('pdpImage').src = getImageUrl(p.nombre, p.imagenUrl);
+        document.getElementById('pdpBrand').innerText = p.marca || 'GENÉRICO';
+        document.getElementById('pdpTitle').innerText = p.nombre;
+        document.getElementById('pdpSku').innerText = 'SKU: ' + (p.sku || 'N/A');
+        
+        const priceVal = parseFloat(p.precioVenta).toFixed(2);
+        const oldPrice = (p.precioVenta * 1.2).toFixed(2);
+        document.getElementById('pdpCurrentPrice').innerText = priceVal;
+        document.getElementById('pdpOldPrice').innerText = 'S/ ' + oldPrice;
+        document.getElementById('pdpDescription').innerText = p.descripcion || 'Sin descripción disponible.';
+        
+        // Stock Alert in PDP
+        const alertContainer = document.getElementById('pdpStockAlertContainer');
+        if (p.stockActual > 0 && p.stockActual <= 5) {
+            alertContainer.innerHTML = `
+            <div class="stock-alert">
+                <span class="pulse-dot"></span>
+                <span class="stock-text">¡Apresúrate! Solo quedan <strong class="stock-count">${p.stockActual}</strong> u.</span>
+            </div>`;
+        } else if (p.stockActual === 0) {
+            alertContainer.innerHTML = `<div class="stock-alert" style="background:var(--danger-bg); color:var(--danger); border-color:#fecaca;">AGOTADO</div>`;
+        } else {
+            alertContainer.innerHTML = '';
+        }
+
+        const addBtn = document.getElementById('pdpAddToCartBtn');
+        addBtn.onclick = () => { addToCart(p.id); closePDP(); };
+        addBtn.disabled = p.stockActual === 0;
+        addBtn.innerText = p.stockActual === 0 ? 'AGOTADO' : 'Añadir al Carrito';
+
+        pdpOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    function closePDP() {
+        pdpOverlay.classList.remove('active');
+        document.body.style.overflow = '';
     }
 
     function filterByCategory(catId, catName, navElement) {
@@ -261,56 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalItems > 0) {
             cartBadge.style.transform = 'scale(1.2)';
             setTimeout(() => cartBadge.style.transform = 'scale(1)', 200);
-            
-            // Activar Sticky Timer
-            const stickyTimer = document.getElementById('stickyTimerBar');
-            if (stickyTimer && !stickyTimer.classList.contains('active')) {
-                stickyTimer.classList.add('active');
-            }
-            startTimerIfNeeded();
-        } else {
-            const stickyTimer = document.getElementById('stickyTimerBar');
-            if (stickyTimer) stickyTimer.classList.remove('active');
         }
     }
     
-    // --- Lógica de Countdown ---
-    let timerInterval = null;
-    function startTimerIfNeeded() {
-        let expireTime = localStorage.getItem('protech_cart_expire');
-        if (!expireTime) {
-            expireTime = Date.now() + 15 * 60 * 1000; // 15 mins
-            localStorage.setItem('protech_cart_expire', expireTime);
-        }
-        
-        if (timerInterval) clearInterval(timerInterval);
-        
-        timerInterval = setInterval(() => {
-            const now = Date.now();
-            const diff = parseInt(expireTime) - now;
-            
-            if (diff <= 0) {
-                clearInterval(timerInterval);
-                localStorage.removeItem('protech_cart_expire');
-                document.getElementById('countdownClock').innerText = "00:00";
-                return;
-            }
-            
-            const minutes = Math.floor(diff / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            const clockEl = document.getElementById('countdownClock');
-            if (clockEl) {
-                clockEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }, 1000);
-    }
-
-    // Al cargar la página, verificar si hay timer activo
-    if (cart.length > 0) {
-        const stickyTimer = document.getElementById('stickyTimerBar');
-        if (stickyTimer) stickyTimer.classList.add('active');
-        startTimerIfNeeded();
-    }
+    // Timer logica movida a checkout.js exclusivamente
 
     function openCart() {
         renderCart();

@@ -76,4 +76,9 @@ public class PageController {
     public String checkout() {
         return "checkout";
     }
+
+    @GetMapping("/cliente/mis-pedidos")
+    public String misPedidos() {
+        return "redirect:/tienda";
+    }
 }
