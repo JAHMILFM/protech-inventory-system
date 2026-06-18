@@ -4,21 +4,21 @@
 
 :root {
     /* Color Palette */
-    --brand-primary: #0f172a;      /* Slate 900 - Trust, Tech */
-    --brand-primary-hover: #1e293b; /* Slate 800 */
-    --brand-accent: #ea580c;        /* Orange 600 - Action, Conversion */
-    --brand-accent-hover: #c2410c;  /* Orange 700 */
+    --brand-primary: var(--sidebar);
+    --brand-primary-hover: var(--sidebar);
+    --brand-accent: var(--accent);
+    --brand-accent-hover: var(--accent-light);
     
-    --bg-main: #f8fafc;             /* Slate 50 - Very light gray */
-    --bg-surface: #ffffff;          /* White cards */
-    --bg-subtle: #f1f5f9;           /* Slate 100 */
+    --bg-main: var(--bg-main);
+    --bg-surface: var(--bg-surface);
+    --bg-subtle: var(--bg-surface);
 
-    --text-high: #020617;           /* Slate 950 - Headings */
-    --text-body: #334155;           /* Slate 700 - Body */
-    --text-muted: #64748b;          /* Slate 500 - Metadata */
+    --text-high: var(--text-main);
+    --text-body: var(--text-main);
+    --text-muted: var(--text-muted);
 
-    --border-light: #e2e8f0;        /* Slate 200 */
-    --border-focus: #bae6fd;        /* Sky 200 */
+    --border-light: var(--border-color);
+    --border-focus: var(--accent);
 
     /* Semantic Colors */
     --success: #16a34a;

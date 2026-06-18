@@ -4,48 +4,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --bg-main: #F8F9FA;
     --bg-dark: #0D1B2A;
-    --sidebar-bg: #1a1f2e;
-    --sidebar-hover: #232a3d;
-    --accent: #CCFF00;
-    --accent-hover: #B8E600;
-    --accent-dim: rgba(204,255,0,0.12);
-    --text-dark: #0D1B2A;
-    --text-body: #415A77;
-    --text-muted: #778DA9;
-    --text-light: #E0E1DD;
+    --sidebar-bg: var(--sidebar);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --accent-dim: var(--accent-light);
+    --text-dark: var(--text-main);
+    --text-body: var(--text-main);
     --white: #FFFFFF;
-    --card-bg: #FFFFFF;
-    --border: #E2E8F0;
-    --danger: #E63946;
-    --danger-bg: rgba(230,57,70,0.1);
-    --success: #2EC4B6;
-    --success-bg: rgba(46,196,182,0.1);
-    --warning: #FF9F1C;
-    --warning-bg: rgba(255,159,28,0.1);
-    --info: #457B9D;
-    --info-bg: rgba(69,123,157,0.1);
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
-    --radius: 14px;
-    --radius-sm: 8px;
+    --card-bg: var(--bg-surface);
+    --border: var(--border-color);
     --sidebar-width: 260px;
     --sidebar-collapsed: 72px;
     --topbar-h: 0px;
-    --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    --radius: var(--radius-lg);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: var(--bg-main);
-    color: var(--text-dark);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
+/* Base styles managed by theme.css */
 
 /* ── TOP BAR ─────────────────────────────── */
 .top-bar {
@@ -394,7 +368,7 @@ body {
     background: var(--card-bg);
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    overflow: hidden;
+    overflow-x: auto;
 }
 .table-toolbar {
     display: flex;

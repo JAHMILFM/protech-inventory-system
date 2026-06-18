@@ -8,15 +8,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --bg-deep:      #0f172a;
-    --bg-dark:      #1e293b;
-    --bg-card:      #1e293b;
-    --bg-panel:     #334155;
-    --bg-hover:     #334155;
-    --bg-input:     #0f172a;
+    --bg-deep:      var(--bg-main);
+    --bg-dark:      var(--bg-surface);
+    --bg-card:      var(--bg-surface);
+    --bg-panel:     var(--bg-main);
+    --bg-hover:     rgba(255,255,255,0.05);
+    --bg-input:     var(--bg-main);
 
-    --accent:       #f97316;
-    --accent-hover: #fb923c;
+    --accent:       var(--accent);
+    --accent-hover: var(--accent-light);
     --accent-glow:  rgba(249,115,22,.25);
 
     --success:      #22c55e;
@@ -27,9 +27,9 @@
     --warning-bg:   rgba(234,179,8,.12);
     --info:         #3b82f6;
 
-    --border:       rgba(255,255,255,.07);
-    --text-primary: #f8fafc;
-    --text-muted:   #94a3b8;
+    --border:       var(--border-color);
+    --text-primary: var(--text-main);
+    --text-muted:   var(--text-muted);
     
     --radius:       12px;
     --radius-sm:    8px;
@@ -41,7 +41,7 @@ html, body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-deep);
     color: var(--text-primary);
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 /* ── Layout ─────────────────────────────── */
